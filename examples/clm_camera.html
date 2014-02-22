@@ -4,77 +4,7 @@
 		<title>Face tracker</title>
 		<meta charset="utf-8">
 		<link href="./styles/bootstrap.min.css" rel="stylesheet" type="text/css">
-		<style>
-			@import	 url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
-			
-			body {
-				font-family: 'Lato';
-				background-color: #f0f0f0;
-				margin: 0px auto;
-				max-width: 1150px;
-			}
-			
-			#overlay {
-				position: absolute;
-				top: 0px;
-				left: 0px;
-				-o-transform : scaleX(-1);
-				-webkit-transform : scaleX(-1);
-				transform : scaleX(-1);
-				-ms-filter : fliph; /*IE*/
-				filter : fliph; /*IE*/
-			}
-
-			#videoel {
-				-o-transform : scaleX(-1);
-				-webkit-transform : scaleX(-1);
-				transform : scaleX(-1);
-				-ms-filter : fliph; /*IE*/
-				filter : fliph; /*IE*/
-			}
-			
-			#container {
-				position : relative;
-				width : 370px;
-				/*margin : 0px auto;*/
-			}
-			
-			#content {
-				margin-top : 70px;
-				margin-left : 100px;
-				margin-right : 100px;
-				max-width: 950px;
-			}
-			
-			#sketch {
-				display: block;
-			}
-			
-			#filter {
-				display: none;
-			}
-			
-			h2 {
-				font-weight : 400;
-			}
-
-			.nogum {
-				display : none;
-			}
-			
-			.btn {
-				font-family: 'Lato';
-				font-size: 16px;
-			}
-
-			.hide {
-				display : none;
-			}
-
-			.nohide {
-				display : block;
-			}
-		</style>
+		<link href="./styles/style.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
 		<script src="./ext_js/utils.js"></script>
@@ -92,6 +22,7 @@
 		<script src="../js/svmfilter_fft.js"></script>
 		<script src="../js/mossefilter.js"></script>
 		<script src="./ext_js/Stats.js"></script>
+		<script src="../processing-1.4.1.min.js"></script>
 		<div id="content">
 			<h2>Facetracking example</h2>
 			<div id="container">
@@ -99,15 +30,15 @@
 					<!--<video id="videoel" width="320" height="240" preload="auto">-->
 					<!--<source src="./media/franck.ogv" type="video/ogg"/>-->
 				</video>
-				<canvas id="overlay" width="400" height="300"></canvas>
+				<canvas id="overlay" width="400" height="300" data-processing-sources="face1.pde"></canvas>
+				<input type="checkbox" id="drawOutline" value="true" onchange="drawOutlineChanged()">outline<br>
+				<input type="checkbox" id="drawHome" value="true" onchange="drawHomeChanged()">home<br>
 				<!--<canvas id="sketch" width="400" height="300"></canvas>-->
 			</div>
 			<br/>
 			<input class="btn" type="button" value="wait, loading video" disabled="disabled" onclick="startVideo()" id="startbutton"></input>
 			<input class="btn" type="button" value="wait, loading video" disabled="disabled" onclick="stopVideo()" id="stopbutton"></input>
-			<br/>
-			<input type="checkbox" id="drawOutline" value="true" onchange="drawOutlineChanged()">outline<br>
-			<input type="checkbox" id="drawHome" value="true" onchange="drawHomeChanged()">home<br>
+			<!-- <canvas id="proceesing" width="400" height="300" data-processing-sources="face1.pde"></canvas> -->
 			<div id="text">
 				<p>This is an example of face tracking using the javascript library <a href="https://github.com/auduno/clmtrackr"><em>clmtrackr</em></a>. The fitting method is generally called "Non-rigid/deformable face tracking/alignment using constrained local models".</p>
 				<p>Note that this example works best in Google Chrome, with a computer that supports WebGL and floating point textures. It should however work in any modern browser.</p>
@@ -138,6 +69,8 @@
 				var vid = document.getElementById('videoel');
 				var overlay = document.getElementById('overlay');
 				var overlayCC = overlay.getContext('2d');
+
+				var processingSketch ;
 				
 				var ctrack = new clm.tracker({useWebGL : true});
 				ctrack.init(pModel);
@@ -221,6 +154,10 @@
 					ctrack.start(vid);
 					// start loop to draw face
 					drawLoop();
+					if( ! processingSketch ) {
+						processingSketch = Processing.getInstanceById("overlay");
+						console.log(processingSketch);
+					}
 				}
 				
 				function stopVideo() {
@@ -232,6 +169,7 @@
 					// start loop to draw face
 					// drawLoop();
 					cancelRequestAnimFrame(runnerTimeout);
+					// processingSketch.setIgnoreMouse(true);
 				}
 				
 				function drawBounds(points) {
@@ -255,9 +193,14 @@
 
 				function drawLoop() {
 					runnerTimeout = requestAnimFrame(drawLoop);
-					overlayCC.clearRect(0, 0, 400, 300);
-					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);
 					var positions = ctrack.getCurrentPosition() ;
+					if(! positions) {
+						return;
+					}
+					if(processingSketch) {
+					}
+					// overlayCC.clearRect(0, 0, 400, 300);
+					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);
 					// if (ctrack.getCurrentPosition()) {
 					if (positions) {
 						if(drawHome){
