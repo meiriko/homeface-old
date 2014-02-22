@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>Face tracker - Meir's version</title>
+		<title>Face tracker</title>
 		<meta charset="utf-8">
 		<link href="./styles/bootstrap.min.css" rel="stylesheet" type="text/css">
 		<style>
-			@import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
+			@import	 url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
 			
 			body {
 				font-family: 'Lato';
@@ -104,6 +104,10 @@
 			</div>
 			<br/>
 			<input class="btn" type="button" value="wait, loading video" disabled="disabled" onclick="startVideo()" id="startbutton"></input>
+			<input class="btn" type="button" value="wait, loading video" disabled="disabled" onclick="stopVideo()" id="stopbutton"></input>
+			<br/>
+			<input type="checkbox" id="drawOutline" value="true" onchange="drawOutlineChanged()">outline<br>
+			<input type="checkbox" id="drawHome" value="true" onchange="drawHomeChanged()">home<br>
 			<div id="text">
 				<p>This is an example of face tracking using the javascript library <a href="https://github.com/auduno/clmtrackr"><em>clmtrackr</em></a>. The fitting method is generally called "Non-rigid/deformable face tracking/alignment using constrained local models".</p>
 				<p>Note that this example works best in Google Chrome, with a computer that supports WebGL and floating point textures. It should however work in any modern browser.</p>
@@ -128,6 +132,9 @@
 			</div>
 			<a href="https://github.com/auduno/clmtrackr"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
 			<script>
+				var runnerTimeout;
+				var drawOutline = false;
+				var drawHome = false;
 				var vid = document.getElementById('videoel');
 				var overlay = document.getElementById('overlay');
 				var overlayCC = overlay.getContext('2d');
@@ -140,10 +147,21 @@
 				stats.domElement.style.top = '0px';
 				document.getElementById('container').appendChild( stats.domElement );
 				
+				function drawOutlineChanged(element) {
+					drawOutline = document.getElementById('drawOutline').checked;
+				}
+
+				function drawHomeChanged(element) {
+					drawHome = document.getElementById('drawHome').checked;
+				}
+
 				function enablestart() {
 					var startbutton = document.getElementById('startbutton');
 					startbutton.value = "start";
 					startbutton.disabled = null;
+					var stopbutton = document.getElementById('stopbutton');
+					stopbutton.value = "stop";
+					stopbutton.disabled = null;
 				}
 				
 				var insertAltVideo = function(video) {
@@ -205,12 +223,53 @@
 					drawLoop();
 				}
 				
+				function stopVideo() {
+					// start video
+					vid.pause();
+					// vid.src = "";
+					// start tracking
+					ctrack.stop();
+					// start loop to draw face
+					// drawLoop();
+					cancelRequestAnimFrame(runnerTimeout);
+				}
+				
+				function drawBounds(points) {
+					var xArray = points.map(function(item){
+						return (item[0]);
+					});
+					var yArray = points.map(function(item){
+						return (item[1]);
+					});
+					var xMin = Math.min.apply(null, xArray);
+					var xMax = Math.max.apply(null, xArray);
+					var yMin = Math.min.apply(null, yArray);
+					var yMax = Math.max.apply(null, yArray);
+
+					overlayCC.beginPath();
+					overlayCC.rect(xMin, yMin, xMax - xMin, yMax - yMin);
+					overlayCC.closePath();
+					overlayCC.stroke();
+						
+				}
+
 				function drawLoop() {
-					requestAnimFrame(drawLoop);
+					runnerTimeout = requestAnimFrame(drawLoop);
 					overlayCC.clearRect(0, 0, 400, 300);
 					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);
-					if (ctrack.getCurrentPosition()) {
-						ctrack.draw(overlay);
+					var positions = ctrack.getCurrentPosition() ;
+					// if (ctrack.getCurrentPosition()) {
+					if (positions) {
+						if(drawHome){
+							overlayCC.strokeStyle = "rgb(255,130,50)";
+							// overlayCC.rect(positions[23][0], positions[24][1], positions[25][0] - positions[23][0], positions[26][1] - positions[24][1]);
+							drawBounds(positions.slice(23, 26));
+							drawBounds(positions.slice(28, 31));
+							drawBounds([positions[37], positions[44], positions[50], positions[53]]);
+						}
+						if(drawOutline){
+							ctrack.draw(overlay);
+						}
 					}
 				}
 				
