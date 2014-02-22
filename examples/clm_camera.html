@@ -156,7 +156,6 @@
 					drawLoop();
 					if( ! processingSketch ) {
 						processingSketch = Processing.getInstanceById("overlay");
-						console.log(processingSketch);
 					}
 				}
 				
@@ -198,6 +197,8 @@
 						return;
 					}
 					if(processingSketch) {
+						processingSketch.fill(155);
+						processingSketch.box(20,30,40);
 					}
 					// overlayCC.clearRect(0, 0, 400, 300);
 					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);

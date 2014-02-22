@@ -1,3 +1,5 @@
+import processing.opengl.*;
+
 // Global variables
 float radius = 50.0;
 int X, Y;
@@ -8,6 +10,7 @@ int delay = 16;
 // Setup the Processing Canvas
 void setup(){
 	size( 400, 300 );
+	// size( 400, 300 , OPENGL);
 	strokeWeight( 10 );
 	frameRate( 15 );
 	X = width / 2;
