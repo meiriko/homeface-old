@@ -18,6 +18,12 @@ body {
 	filter : fliph; /*IE*/
 }
 
+#overlayHF {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
 #videoel {
 	-o-transform : scaleX(-1);
 	-webkit-transform : scaleX(-1);
@@ -32,6 +38,13 @@ body {
 	/*margin : 0px auto;*/
 }
 
+#containerHF {
+	position : relative;
+	width : 700px;
+	height : 500px;
+	/*margin : 0px auto;*/
+}
+
 #content {
 	margin-top : 70px;
 	margin-left : 100px;
@@ -41,6 +54,10 @@ body {
 
 #sketch {
 	display: block;
+}
+
+#convergence {
+	display : inline;
 }
 
 #filter {
