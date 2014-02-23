@@ -18,6 +18,7 @@
 		<script src="./ext_js/nose_filter.js"></script>
 		<script src="../models/model_pca_20_svm.js"></script>
 		<script src="../js/clm.js"></script>
+		<script src="../js/utils.js"></script>
 		<script src="../js/svmfilter_webgl.js"></script>
 		<script src="../js/svmfilter_fft.js"></script>
 		<script src="../js/mossefilter.js"></script>
@@ -46,6 +47,7 @@
 				var cc = document.getElementById('image').getContext('2d');
 				var overlay = document.getElementById('overlayHF');
 				var overlayCC = overlay.getContext('2d');
+				var points;
 			
 				var img = new Image();
 				img.onload = function() {
@@ -67,7 +69,46 @@
 					ctrack.start(document.getElementById('image'), box);
 					drawLoop();
 				}
-				
+
+				function rect(x,y,w,h){
+					var canvas = document.getElementById('image')
+					var cc = canvas.getContext('2d');
+
+					cc.rect(x,y,w,h);
+					cc.stroke();
+				}
+
+				function path(points){
+					if(!points || points.length === 0 ){
+						return;
+					}
+					var canvas = document.getElementById('image')
+					var cc = canvas.getContext('2d');
+					cc.beginPath();
+					cc.moveTo(points[0][0],points[0][1]);
+					for(var i = 1 ; i < points.length ; i++){
+						cc.lineTo(points[i][0], points[i][1]);
+					}
+					cc.closePath();
+					cc.stroke();
+				}
+
+				function drawHome(points){
+			test1();
+					return;
+			var testExpr = 'rect(min(xVal()),50,60,70)';
+			eval(testExpr);
+					var canvas = document.getElementById('image')
+					var cc = canvas.getContext('2d');
+					cc.beginPath();
+					cc.moveTo(points[0][0],points[0][1]);
+					for(var i = 1 ; i < points.length ; i++){
+						cc.lineTo(points[i][0], points[i][1]);
+					}
+					cc.closePath();
+					cc.stroke();
+				}
+
 				function drawLoop() {
 					drawRequest = requestAnimFrame(drawLoop);
 					overlayCC.clearRect(0, 0, 720, 576);
@@ -75,7 +116,20 @@
 						ctrack.draw(overlay);
 					}
 				}
-				
+
+				function test1() {
+					$.getJSON('/examples/home1.json', function(data) {
+						for( var key in data ){
+							console.log( 'plotting ' , key ) ;
+							console.log(data[key]);
+							eval( data[key] );
+						}
+					}).fail(function(jqxhr, textStatus, error) {
+						console.log( textStatus );
+					});
+
+				}
+
 				// detect if tracker fails to find a face
 				document.addEventListener("clmtrackrNotFound", function(event) {
 					ctrack.stop();
@@ -94,6 +148,8 @@
 					document.getElementById('convergence').style.backgroundColor = "#00FF00";
 					// stop drawloop
 					cancelRequestAnimFrame(drawRequest);
+					points = ctrack.getCurrentPosition();
+					drawHome(ctrack.getCurrentPosition());
 				}, false);
 				
 				// update stats on iteration
