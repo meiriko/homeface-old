@@ -32,9 +32,14 @@
 		
 		<div id="content">
 			<h2>Face tracking in images</h2>
-			<div id="containerHF">
-				<canvas id="image" width="625" height="500"></canvas>
-				<canvas id="overlayHF" width="625" height="500"></canvas>
+			<div id="mainGraphics">
+				<div id="containerHF">
+					<canvas id="imageHF" width="625" height="500"></canvas>
+					<canvas id="overlayHF" width="625" height="500"></canvas>
+				</div>
+				<div id="homeCanvasDiv">
+					<canvas id="homeCanvas" width="625" height="500"></canvas>
+				</div>
 			</div>
 			<br/>
 			<input type="button" class="btn" value="start" onclick="animate()"></input>
@@ -44,7 +49,7 @@
 			<p id="convergence"></p>
 
 			<script>
-				var cc = document.getElementById('image').getContext('2d');
+				var cc = document.getElementById('imageHF').getContext('2d');
 				var overlay = document.getElementById('overlayHF');
 				var overlayCC = overlay.getContext('2d');
 				var points;
@@ -66,15 +71,24 @@
 				var drawRequest;
 				
 				function animate(box) {
-					ctrack.start(document.getElementById('image'), box);
+					ctrack.start(document.getElementById('imageHF'), box);
 					drawLoop();
 				}
 
 				function rect(x,y,w,h){
-					var canvas = document.getElementById('image')
+					var canvas = document.getElementById('imageHF')
 					var cc = canvas.getContext('2d');
-
+					cc.beginPath()
 					cc.rect(x,y,w,h);
+					cc.closePath()
+					cc.stroke();
+
+					var homeCanvas = document.getElementById('homeCanvas')
+					cc = homeCanvas.getContext('2d');
+					// cc.clearRect(0,0,620,500);
+					cc.beginPath()
+					cc.rect(x,y,w,h);
+					cc.closePath()
 					cc.stroke();
 				}
 
@@ -82,42 +96,25 @@
 					if(!points || points.length === 0 ){
 						return;
 					}
-					var canvas = document.getElementById('image')
+					var canvas = document.getElementById('imageHF')
+					var homeCanvas = document.getElementById('homeCanvas')
 					var cc = canvas.getContext('2d');
+					var ccHC = homeCanvas.getContext('2d');
 					cc.beginPath();
 					cc.moveTo(points[0][0],points[0][1]);
+					ccHC.beginPath();
+					ccHC.moveTo(points[0][0],points[0][1]);
 					for(var i = 1 ; i < points.length ; i++){
 						cc.lineTo(points[i][0], points[i][1]);
+						ccHC.lineTo(points[i][0], points[i][1]);
 					}
 					cc.closePath();
 					cc.stroke();
+					ccHC.closePath();
+					ccHC.stroke();
 				}
 
 				function drawHome(points){
-			test1();
-					return;
-			var testExpr = 'rect(min(xVal()),50,60,70)';
-			eval(testExpr);
-					var canvas = document.getElementById('image')
-					var cc = canvas.getContext('2d');
-					cc.beginPath();
-					cc.moveTo(points[0][0],points[0][1]);
-					for(var i = 1 ; i < points.length ; i++){
-						cc.lineTo(points[i][0], points[i][1]);
-					}
-					cc.closePath();
-					cc.stroke();
-				}
-
-				function drawLoop() {
-					drawRequest = requestAnimFrame(drawLoop);
-					overlayCC.clearRect(0, 0, 720, 576);
-					if (ctrack.getCurrentPosition()) {
-						ctrack.draw(overlay);
-					}
-				}
-
-				function test1() {
 					$.getJSON('/examples/home1.json', function(data) {
 						for( var key in data ){
 							console.log( 'plotting ' , key ) ;
@@ -127,7 +124,14 @@
 					}).fail(function(jqxhr, textStatus, error) {
 						console.log( textStatus );
 					});
+				}
 
+				function drawLoop() {
+					drawRequest = requestAnimFrame(drawLoop);
+					overlayCC.clearRect(0, 0, 720, 576);
+					if (ctrack.getCurrentPosition()) {
+						ctrack.draw(overlay);
+					}
 				}
 
 				// detect if tracker fails to find a face
@@ -163,7 +167,7 @@
 					document.getElementById('convergence').innerHTML = "";
 					ctrack.reset();
 					$('#overlayHF').addClass('hide');
-					$('#image').imgAreaSelect({
+					$('#imageHF').imgAreaSelect({
 						handles : true,
 						onSelectEnd : function(img, selection) {
 							// create box
@@ -186,7 +190,7 @@
 								// check if positions already exist in storage
 							
 								// Render thumbnail.
-								var canvas = document.getElementById('image')
+								var canvas = document.getElementById('imageHF')
 								var cc = canvas.getContext('2d');
 								var img = new Image();
 								img.onload = function() {
@@ -219,7 +223,11 @@
 				}
 
 				function loadImageFromUrl(imgUrl) {
-					var canvas = document.getElementById('image')
+					var homeCanvas = document.getElementById('homeCanvas')
+					var ccHC = homeCanvas.getContext('2d');
+					ccHC.clearRect(0, 0, 625, 500);
+
+					var canvas = document.getElementById('imageHF')
 					var cc = canvas.getContext('2d');
 					var img = new Image();
 					img.onload = function() {

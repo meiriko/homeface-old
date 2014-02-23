@@ -18,7 +18,7 @@ body {
 	filter : fliph; /*IE*/
 }
 
-#overlayHF {
+#overlayHF , #imageHF{
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -40,9 +40,21 @@ body {
 
 #containerHF {
 	position : relative;
-	width : 700px;
+	width : 650px;
 	height : 500px;
+	// float: left;
+	display: inline-block;
 	/*margin : 0px auto;*/
+}
+
+#homeCanvasDiv {
+	display: inline-block;
+	width : 650px;
+	height : 500px;
+}
+
+#mainGraphics {
+	width: 1400px;
 }
 
 #content {

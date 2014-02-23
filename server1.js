@@ -9,7 +9,15 @@ my_http.createServer(function(request,response){
 	var my_path = url.parse(request.url).pathname;
 	var passThrough = ( my_path.indexOf('/pt/') === 0);
 	if( passThrough ) {
-		requestSVC(my_path.substring(4)).pipe(response);
+		var ptUrl = my_path.substring(4) ;
+		if( ptUrl.indexOf('http') !== 0 ) {
+			ptUrl = 'http://' + ptUrl;
+		}
+		try {
+			requestSVC(ptUrl).pipe(response);
+		} catch( e ) {
+			console.log( e );
+		}
 	} else {
 		var full_path = path.join(process.cwd(),my_path);
 		path.exists(full_path,function(exists){
